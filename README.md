@@ -1,6 +1,6 @@
 # Image Upload API Documentation
 
-Base URL: `https://abcd.com`
+Base URL: `https://file2link-ol4p.onrender.com`
 
 ## Endpoints
 
