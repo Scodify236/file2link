@@ -13,7 +13,7 @@ def ping_file2link():
     """Ping the file2link service every 10 seconds"""
     while True:
         try:
-            response = requests.get('https://github.com/Scodify236/file2link')
+            response = requests.get('https://file2link-ol4p.onrender.com')
             if response.status_code == 200:
                 print(f"[{datetime.now()}] Successfully pinged file2link service")
             else:
@@ -90,4 +90,5 @@ def upload_file():
             return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True) 
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=True) 
