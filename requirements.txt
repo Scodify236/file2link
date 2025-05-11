@@ -1,0 +1,4 @@
+internetarchive==3.5.0
+Flask==3.0.0
+python-dotenv==0.19.0
+Werkzeug==3.0.1 
