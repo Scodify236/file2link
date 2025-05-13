@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, Response
 import internetarchive as ia
 import os
 from datetime import datetime
@@ -6,6 +6,7 @@ import uuid
 import threading
 import time
 import requests
+import json
 
 app = Flask(__name__)
 
@@ -61,33 +62,50 @@ def upload_file():
                 'subject': ['file2link', 'file sharing'],
                 'original_filename': original_filename
             }
-            
-            # Upload the file with metadata using the upload function
-            r = ia.upload(
-                item_id,
-                files={unique_filename: file},
-                metadata=metadata,
-                access_key='PrJnoIKjNt4ul1Fr',
-                secret_key='S0tCXWb7fM43m44Y'
-            )
-            
-            if r[0].status_code == 200:
-                # Get the access URL with the correct format
-                access_url = f'https://archive.org/download/{item_id}/{unique_filename}'
+
+            def generate_progress():
+                total_size = 0
+                uploaded_size = 0
                 
-                return jsonify({
-                    'success': True,
-                    'access_url': access_url,
-                    'item_id': item_id,
-                    'original_filename': original_filename,
-                    'unique_filename': unique_filename,
-                    'metadata': metadata
-                })
-            else:
-                return jsonify({'error': 'Upload failed'}), 500
+                # Get file size
+                file.seek(0, os.SEEK_END)
+                total_size = file.tell()
+                file.seek(0)
+                
+                # Upload the file with metadata using the upload function
+                r = ia.upload(
+                    item_id,
+                    files={unique_filename: file},
+                    metadata=metadata,
+                    access_key='PrJnoIKjNt4ul1Fr',
+                    secret_key='S0tCXWb7fM43m44Y',
+                    callback=lambda uploaded: update_progress(uploaded, total_size)
+                )
+                
+                if r[0].status_code == 200:
+                    # Get the access URL with the correct format
+                    access_url = f'https://archive.org/download/{item_id}/{unique_filename}'
+                    
+                    return json.dumps({
+                        'success': True,
+                        'access_url': access_url,
+                        'item_id': item_id,
+                        'original_filename': original_filename,
+                        'unique_filename': unique_filename,
+                        'metadata': metadata,
+                        'progress': 100
+                    })
+                else:
+                    return json.dumps({'error': 'Upload failed', 'progress': 0})
+
+            def update_progress(uploaded, total):
+                progress = int((uploaded / total) * 100)
+                yield f"data: {json.dumps({'progress': progress})}\n\n"
+
+            return Response(generate_progress(), mimetype='text/event-stream')
             
         except Exception as e:
-            return jsonify({'error': str(e)}), 500
+            return jsonify({'error': str(e), 'progress': 0}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
