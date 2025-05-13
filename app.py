@@ -51,14 +51,14 @@ def upload_file():
             
             # Prepare metadata
             metadata = {
-                'title': f'Shop Project Image - {original_filename}',
-                'mediatype': 'image',
+                'title': f'File2Link Upload - {original_filename}',
+                'mediatype': 'data',
                 'collection': 'opensource',
                 'description': f'Original filename: {original_filename}',
-                'creator': 'Shop Project Uploader',
+                'creator': 'File2Link Uploader',
                 'date': datetime.now().strftime('%Y-%m-%d'),
                 'licenseurl': 'https://creativecommons.org/licenses/by/4.0/',
-                'subject': ['shop', 'project', 'images'],
+                'subject': ['file2link', 'file sharing'],
                 'original_filename': original_filename
             }
             
