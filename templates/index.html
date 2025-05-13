@@ -242,6 +242,80 @@
             margin-top: 0.5rem;
         }
 
+        /* History Section Styles */
+        .history-section {
+            background-color: var(--bg-secondary);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            border: 1px solid var(--border);
+        }
+
+        .history-section h2 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .history-item {
+            background-color: var(--bg-primary);
+            padding: 1rem;
+            border-radius: 5px;
+            border: 1px solid var(--border);
+        }
+
+        .history-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .history-item-title {
+            color: var(--text-primary);
+            font-weight: 500;
+            word-break: break-all;
+        }
+
+        .history-item-date {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .history-item-link {
+            color: var(--accent);
+            text-decoration: none;
+            word-break: break-all;
+            display: block;
+            margin-top: 0.5rem;
+        }
+
+        .history-item-link:hover {
+            text-decoration: underline;
+        }
+
+        .clear-history {
+            background-color: var(--error);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .clear-history:hover {
+            background-color: #d83c3e;
+        }
+
         @media (max-width: 480px) {
             .container {
                 padding: 0.5rem;
@@ -300,6 +374,13 @@
             <h3>Upload Successful!</h3>
             <p>Your file is ready to share:</p>
             <p><a id="accessUrl" href="" target="_blank"></a></p>
+        </div>
+
+        <!-- History Section -->
+        <div class="history-section" id="historySection">
+            <h2>Upload History</h2>
+            <div class="history-list" id="historyList"></div>
+            <button class="clear-history" id="clearHistory">Clear History</button>
         </div>
     </div>
 
@@ -391,6 +472,66 @@
             resultDiv.style.display = 'block';
             document.getElementById('error').style.display = 'none';
         }
+
+        // History Management
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem('uploadHistory') || '[]');
+            displayHistory(history);
+        }
+
+        function saveToHistory(uploadData) {
+            const history = JSON.parse(localStorage.getItem('uploadHistory') || '[]');
+            const newEntry = {
+                original_filename: uploadData.original_filename,
+                access_url: uploadData.access_url,
+                upload_date: new Date().toLocaleString(),
+                file_size: uploadData.file_size || 'Unknown'
+            };
+            history.unshift(newEntry); // Add to beginning of array
+            localStorage.setItem('uploadHistory', JSON.stringify(history));
+            displayHistory(history);
+        }
+
+        function displayHistory(history) {
+            const historyList = document.getElementById('historyList');
+            historyList.innerHTML = '';
+
+            if (history.length === 0) {
+                historyList.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">No upload history yet</p>';
+                return;
+            }
+
+            history.forEach(item => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                historyItem.innerHTML = `
+                    <div class="history-item-header">
+                        <span class="history-item-title">${item.original_filename}</span>
+                        <span class="history-item-date">${item.upload_date}</span>
+                    </div>
+                    <a href="${item.access_url}" class="history-item-link" target="_blank">${item.access_url}</a>
+                `;
+                historyList.appendChild(historyItem);
+            });
+        }
+
+        // Clear History
+        document.getElementById('clearHistory').addEventListener('click', () => {
+            if (confirm('Are you sure you want to clear all upload history?')) {
+                localStorage.removeItem('uploadHistory');
+                loadHistory();
+            }
+        });
+
+        // Load history when page loads
+        document.addEventListener('DOMContentLoaded', loadHistory);
+
+        // Modify the existing upload success handler to save to history
+        const originalOnSuccess = onSuccess;
+        onSuccess = function(data) {
+            originalOnSuccess(data);
+            saveToHistory(data);
+        };
     </script>
 </body>
 </html> 
