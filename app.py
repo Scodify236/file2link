@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify, Response
+from flask_cors import CORS
 import internetarchive as ia
 import os
 from datetime import datetime
@@ -9,6 +10,26 @@ import requests
 import json
 
 app = Flask(__name__)
+
+# Configure CORS
+CORS(app, resources={
+    r"/*": {
+        "origins": "*",
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"],
+        "expose_headers": ["Content-Type", "X-CSRFToken"],
+        "supports_credentials": True,
+        "max_age": 600
+    }
+})
+
+# Add CORS headers to all responses
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
 
 def ping_file2link():
     """Ping the file2link service every 10 seconds"""
