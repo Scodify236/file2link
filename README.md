@@ -1,11 +1,11 @@
-# Image Upload API Documentation
+# File2Link API Documentation
 
 Base URL: `https://file2link-ol4p.onrender.com`
 
 ## Endpoints
 
-### Upload Image
-Upload an image to Internet Archive and get its access URL.
+### Upload File
+Upload a file to Internet Archive and get its access URL.
 
 **URL:** `/upload`  
 **Method:** `POST`  
@@ -14,7 +14,7 @@ Upload an image to Internet Archive and get its access URL.
 #### Request Parameters
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| file | File | The image file to upload (supported formats: jpg, jpeg, png, gif) |
+| file | File | The file to upload (supports various file types) |
 
 #### Success Response
 **Code:** 200 OK  
@@ -27,14 +27,14 @@ Upload an image to Internet Archive and get its access URL.
     "original_filename": "example.jpg",
     "unique_filename": "550e8400-e29b-41d4-a716-446655440000.jpg",
     "metadata": {
-        "title": "Shop Project Image - example.jpg",
-        "mediatype": "image",
+        "title": "Shop Project File - example.jpg",
+        "mediatype": "data",
         "collection": "opensource",
         "description": "Original filename: example.jpg",
         "creator": "Shop Project Uploader",
         "date": "2024-03-14",
         "licenseurl": "https://creativecommons.org/licenses/by/4.0/",
-        "subject": ["shop", "project", "images"],
+        "subject": ["shop", "project", "files"],
         "original_filename": "example.jpg"
     }
 }
@@ -68,17 +68,17 @@ Currently, no authentication is required to use the API.
 ### cURL
 ```bash
 curl -X POST \
-  https://abcd.com/upload \
+  https://file2link-ol4p.onrender.com/upload \
   -H 'Content-Type: multipart/form-data' \
-  -F 'file=@/path/to/image.jpg'
+  -F 'file=@/path/to/file.jpg'
 ```
 
 ### Python
 ```python
 import requests
 
-url = "https://abcd.com/upload"
-files = {'file': open('image.jpg', 'rb')}
+url = "https://file2link-ol4p.onrender.com/upload"
+files = {'file': open('file.jpg', 'rb')}
 response = requests.post(url, files=files)
 print(response.json())
 ```
@@ -88,7 +88,7 @@ print(response.json())
 const formData = new FormData();
 formData.append('file', fileInput.files[0]);
 
-fetch('https://abcd.com/upload', {
+fetch('https://file2link-ol4p.onrender.com/upload', {
     method: 'POST',
     body: formData
 })
