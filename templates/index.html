@@ -16,34 +16,46 @@
             --error: #f04747;
         }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg-primary);
             color: var(--text-primary);
+            min-height: 100vh;
+            padding: 1rem;
+            line-height: 1.6;
+        }
+
+        .container {
             max-width: 800px;
             margin: 0 auto;
-            padding: 20px;
-            line-height: 1.6;
+            padding: 1rem;
         }
 
         h1 {
             text-align: center;
             color: var(--accent);
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
         }
 
         .subtitle {
             text-align: center;
             color: var(--text-secondary);
             margin-bottom: 2rem;
-            font-size: 1.1rem;
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
         }
 
         .upload-container {
             background-color: var(--bg-secondary);
             border: 2px dashed var(--border);
             border-radius: 10px;
-            padding: 2rem;
+            padding: clamp(1rem, 3vw, 2rem);
             text-align: center;
             margin: 2rem 0;
             transition: all 0.3s ease;
@@ -74,32 +86,37 @@
             border-radius: 5px;
             color: var(--text-primary);
             cursor: pointer;
+            font-size: clamp(0.8rem, 2vw, 1rem);
         }
 
         .upload-btn {
             background-color: var(--accent);
             color: white;
             border: none;
-            padding: 1rem 2rem;
+            padding: clamp(0.8rem, 2vw, 1rem) clamp(1.5rem, 4vw, 2rem);
             border-radius: 5px;
             cursor: pointer;
-            font-size: 1rem;
-            transition: background-color 0.3s ease;
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 400px;
         }
 
         .upload-btn:hover {
             background-color: #5b6eae;
+            transform: translateY(-2px);
         }
 
         .upload-btn:disabled {
             background-color: var(--border);
             cursor: not-allowed;
+            transform: none;
         }
 
         .result {
             background-color: var(--bg-secondary);
             border-radius: 10px;
-            padding: 1.5rem;
+            padding: clamp(1rem, 3vw, 1.5rem);
             margin-top: 2rem;
             display: none;
             border: 1px solid var(--border);
@@ -108,12 +125,14 @@
         .result h3 {
             color: var(--success);
             margin-top: 0;
+            font-size: clamp(1.1rem, 3vw, 1.3rem);
         }
 
         .result a {
             color: var(--accent);
             word-break: break-all;
             text-decoration: none;
+            font-size: clamp(0.8rem, 2vw, 1rem);
         }
 
         .result a:hover {
@@ -128,12 +147,13 @@
             margin: 1rem 0;
             display: none;
             border: 1px solid var(--error);
+            font-size: clamp(0.8rem, 2vw, 1rem);
         }
 
         .progress-container {
             width: 100%;
             max-width: 400px;
-            margin: 1rem 0;
+            margin: 1rem auto;
             display: none;
         }
 
@@ -143,25 +163,53 @@
             background-color: var(--bg-primary);
             border-radius: 10px;
             overflow: hidden;
+            position: relative;
         }
 
         .progress {
             width: 0%;
             height: 100%;
-            background-color: var(--accent);
+            background: linear-gradient(90deg, var(--accent), #5b6eae);
             transition: width 0.3s ease;
+            position: relative;
+        }
+
+        .progress::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                45deg,
+                rgba(255, 255, 255, 0.2) 25%,
+                transparent 25%,
+                transparent 50%,
+                rgba(255, 255, 255, 0.2) 50%,
+                rgba(255, 255, 255, 0.2) 75%,
+                transparent 75%
+            );
+            background-size: 30px 30px;
+            animation: move 2s linear infinite;
+        }
+
+        @keyframes move {
+            0% { background-position: 0 0; }
+            100% { background-position: 30px 0; }
         }
 
         .progress-text {
             text-align: center;
             margin-top: 0.5rem;
             color: var(--text-secondary);
+            font-size: clamp(0.8rem, 2vw, 1rem);
         }
 
         .file-info {
             margin-top: 1rem;
             color: var(--text-secondary);
-            font-size: 0.9rem;
+            font-size: clamp(0.8rem, 2vw, 0.9rem);
         }
 
         .features {
@@ -173,59 +221,86 @@
 
         .feature {
             background-color: var(--bg-secondary);
-            padding: 1rem;
+            padding: clamp(0.8rem, 2vw, 1rem);
             border-radius: 5px;
             text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .feature:hover {
+            transform: translateY(-5px);
         }
 
         .feature h3 {
             color: var(--accent);
             margin-top: 0;
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+        }
+
+        .feature p {
+            font-size: clamp(0.8rem, 2vw, 0.9rem);
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0.5rem;
+            }
+            
+            .upload-container {
+                padding: 1rem;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>File2Link</h1>
-    <p class="subtitle">Secure, Fast, and Reliable File Sharing</p>
-    
-    <div class="features">
-        <div class="feature">
-            <h3>Large Files</h3>
-            <p>Support for files up to 2GB</p>
-        </div>
-        <div class="feature">
-            <h3>All Formats</h3>
-            <p>Upload any type of file</p>
-        </div>
-        <div class="feature">
-            <h3>Secure</h3>
-            <p>End-to-end encryption</p>
-        </div>
-    </div>
-
-    <div class="upload-container">
-        <form id="uploadForm" class="upload-form">
-            <div class="file-input-wrapper">
-                <input type="file" id="fileInput" required class="file-input">
+    <div class="container">
+        <h1>File2Link</h1>
+        <p class="subtitle">Secure, Fast, and Reliable File Sharing</p>
+        
+        <div class="features">
+            <div class="feature">
+                <h3>Large Files</h3>
+                <p>Support for files up to 2GB</p>
             </div>
-            <div class="file-info">Maximum file size: 2GB</div>
-            <button type="submit" class="upload-btn">Upload File</button>
-        </form>
-    </div>
-
-    <div class="progress-container" id="progressContainer">
-        <div class="progress-bar">
-            <div class="progress" id="progressBar"></div>
+            <div class="feature">
+                <h3>All Formats</h3>
+                <p>Upload any type of file</p>
+            </div>
+            <div class="feature">
+                <h3>Secure</h3>
+                <p>End-to-end encryption</p>
+            </div>
         </div>
-        <div class="progress-text" id="progressText">0%</div>
-    </div>
 
-    <div id="error" class="error"></div>
-    
-    <div id="result" class="result">
-        <h3>Upload Successful!</h3>
-        <p>Your file is ready to share:</p>
-        <p><a id="accessUrl" href="" target="_blank"></a></p>
+        <div class="upload-container">
+            <form id="uploadForm" class="upload-form">
+                <div class="file-input-wrapper">
+                    <input type="file" id="fileInput" required class="file-input">
+                </div>
+                <div class="file-info">Maximum file size: 2GB</div>
+                <button type="submit" class="upload-btn">Upload File</button>
+            </form>
+        </div>
+
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+            <div class="progress-text" id="progressText">0%</div>
+        </div>
+
+        <div id="error" class="error"></div>
+        
+        <div id="result" class="result">
+            <h3>Upload Successful!</h3>
+            <p>Your file is ready to share:</p>
+            <p><a id="accessUrl" href="" target="_blank"></a></p>
+        </div>
     </div>
 
     <script>
@@ -256,39 +331,36 @@
             formData.append('file', file);
 
             try {
-                const xhr = new XMLHttpRequest();
-                xhr.open('POST', '/upload', true);
-
-                xhr.upload.onprogress = (e) => {
-                    if (e.lengthComputable) {
-                        const percentComplete = (e.loaded / e.total) * 100;
-                        progressBar.style.width = percentComplete + '%';
-                        progressText.textContent = Math.round(percentComplete) + '%';
-                    }
-                };
-
-                xhr.onload = function() {
-                    if (xhr.status === 200) {
-                        const data = JSON.parse(xhr.responseText);
-                        if (data.error) {
-                            showError(data.error);
-                        } else {
+                const eventSource = new EventSource('/upload');
+                
+                eventSource.onmessage = function(event) {
+                    const data = JSON.parse(event.data);
+                    
+                    if (data.error) {
+                        showError(data.error);
+                        eventSource.close();
+                        uploadBtn.disabled = false;
+                        progressContainer.style.display = 'none';
+                    } else if (data.progress !== undefined) {
+                        progressBar.style.width = data.progress + '%';
+                        progressText.textContent = data.progress + '%';
+                        
+                        if (data.progress === 100) {
+                            eventSource.close();
                             showResult(data.access_url);
+                            uploadBtn.disabled = false;
+                            progressContainer.style.display = 'none';
                         }
-                    } else {
-                        showError('Upload failed');
                     }
-                    uploadBtn.disabled = false;
-                    progressContainer.style.display = 'none';
                 };
 
-                xhr.onerror = function() {
+                eventSource.onerror = function() {
                     showError('Network error occurred');
+                    eventSource.close();
                     uploadBtn.disabled = false;
                     progressContainer.style.display = 'none';
                 };
 
-                xhr.send(formData);
             } catch (error) {
                 showError('An error occurred during upload');
                 uploadBtn.disabled = false;
