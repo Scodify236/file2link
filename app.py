@@ -72,14 +72,13 @@ def upload_file():
                 total_size = file.tell()
                 file.seek(0)
                 
-                # Upload the file with metadata using the upload function
+                # Upload the file with metadata
                 r = ia.upload(
                     item_id,
                     files={unique_filename: file},
                     metadata=metadata,
                     access_key='PrJnoIKjNt4ul1Fr',
-                    secret_key='S0tCXWb7fM43m44Y',
-                    callback=lambda uploaded: update_progress(uploaded, total_size)
+                    secret_key='S0tCXWb7fM43m44Y'
                 )
                 
                 if r[0].status_code == 200:
@@ -92,17 +91,12 @@ def upload_file():
                         'item_id': item_id,
                         'original_filename': original_filename,
                         'unique_filename': unique_filename,
-                        'metadata': metadata,
-                        'progress': 100
+                        'metadata': metadata
                     })
                 else:
-                    return json.dumps({'error': 'Upload failed', 'progress': 0})
+                    return json.dumps({'error': 'Upload failed'})
 
-            def update_progress(uploaded, total):
-                progress = int((uploaded / total) * 100)
-                yield f"data: {json.dumps({'progress': progress})}\n\n"
-
-            return Response(generate_progress(), mimetype='text/event-stream')
+            return Response(generate_progress(), mimetype='application/json')
             
         except Exception as e:
             return jsonify({'error': str(e), 'progress': 0}), 500
