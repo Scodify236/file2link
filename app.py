@@ -52,8 +52,11 @@ ping_thread.start()
 def index():
     return render_template('index.html')
 
-@app.route('/upload', methods=['POST'])
+@app.route('/upload', methods=['POST', 'OPTIONS'])
 def upload_file():
+    if request.method == 'OPTIONS':
+        return '', 200
+        
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'}), 400
     
