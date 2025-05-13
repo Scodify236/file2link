@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Upload to Internet Archive</title>
+    <title>File2Link - Secure File Sharing</title>
     <style>
         :root {
             --bg-primary: #1a1a1a;
@@ -29,7 +29,14 @@
         h1 {
             text-align: center;
             color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-secondary);
             margin-bottom: 2rem;
+            font-size: 1.1rem;
         }
 
         .upload-container {
@@ -84,6 +91,11 @@
             background-color: #5b6eae;
         }
 
+        .upload-btn:disabled {
+            background-color: var(--border);
+            cursor: not-allowed;
+        }
+
         .result {
             background-color: var(--bg-secondary);
             border-radius: 10px;
@@ -118,82 +130,169 @@
             border: 1px solid var(--error);
         }
 
-        .loading {
-            display: none;
-            text-align: center;
+        .progress-container {
+            width: 100%;
+            max-width: 400px;
             margin: 1rem 0;
+            display: none;
         }
 
-        .loading::after {
-            content: '';
-            display: inline-block;
-            width: 20px;
+        .progress-bar {
+            width: 100%;
             height: 20px;
-            border: 2px solid var(--accent);
-            border-radius: 50%;
-            border-top-color: transparent;
-            animation: spin 1s linear infinite;
+            background-color: var(--bg-primary);
+            border-radius: 10px;
+            overflow: hidden;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        .progress {
+            width: 0%;
+            height: 100%;
+            background-color: var(--accent);
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .file-info {
+            margin-top: 1rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .feature {
+            background-color: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .feature h3 {
+            color: var(--accent);
+            margin-top: 0;
         }
     </style>
 </head>
 <body>
-    <h1>Image Upload to Internet Archive</h1>
+    <h1>File2Link</h1>
+    <p class="subtitle">Secure, Fast, and Reliable File Sharing</p>
     
+    <div class="features">
+        <div class="feature">
+            <h3>Large Files</h3>
+            <p>Support for files up to 2GB</p>
+        </div>
+        <div class="feature">
+            <h3>All Formats</h3>
+            <p>Upload any type of file</p>
+        </div>
+        <div class="feature">
+            <h3>Secure</h3>
+            <p>End-to-end encryption</p>
+        </div>
+    </div>
+
     <div class="upload-container">
         <form id="uploadForm" class="upload-form">
             <div class="file-input-wrapper">
-                <input type="file" id="fileInput" accept="image/*" required class="file-input">
+                <input type="file" id="fileInput" required class="file-input">
             </div>
-            <button type="submit" class="upload-btn">Upload Image</button>
+            <div class="file-info">Maximum file size: 2GB</div>
+            <button type="submit" class="upload-btn">Upload File</button>
         </form>
     </div>
 
-    <div id="loading" class="loading"></div>
+    <div class="progress-container" id="progressContainer">
+        <div class="progress-bar">
+            <div class="progress" id="progressBar"></div>
+        </div>
+        <div class="progress-text" id="progressText">0%</div>
+    </div>
+
     <div id="error" class="error"></div>
     
     <div id="result" class="result">
         <h3>Upload Successful!</h3>
-        <p>Access URL: <a id="accessUrl" href="" target="_blank"></a></p>
+        <p>Your file is ready to share:</p>
+        <p><a id="accessUrl" href="" target="_blank"></a></p>
     </div>
 
     <script>
-        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+        const form = document.getElementById('uploadForm');
+        const fileInput = document.getElementById('fileInput');
+        const uploadBtn = document.querySelector('.upload-btn');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const fileInput = document.getElementById('fileInput');
             const file = fileInput.files[0];
-            const loading = document.getElementById('loading');
-            
             if (!file) {
                 showError('Please select a file');
                 return;
             }
 
-            loading.style.display = 'block';
+            if (file.size > 2 * 1024 * 1024 * 1024) { // 2GB
+                showError('File size exceeds 2GB limit');
+                return;
+            }
+
+            uploadBtn.disabled = true;
+            progressContainer.style.display = 'block';
             const formData = new FormData();
             formData.append('file', file);
 
             try {
-                const response = await fetch('/upload', {
-                    method: 'POST',
-                    body: formData
-                });
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', '/upload', true);
 
-                const data = await response.json();
+                xhr.upload.onprogress = (e) => {
+                    if (e.lengthComputable) {
+                        const percentComplete = (e.loaded / e.total) * 100;
+                        progressBar.style.width = percentComplete + '%';
+                        progressText.textContent = Math.round(percentComplete) + '%';
+                    }
+                };
 
-                if (data.error) {
-                    showError(data.error);
-                } else {
-                    showResult(data.access_url);
-                }
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        const data = JSON.parse(xhr.responseText);
+                        if (data.error) {
+                            showError(data.error);
+                        } else {
+                            showResult(data.access_url);
+                        }
+                    } else {
+                        showError('Upload failed');
+                    }
+                    uploadBtn.disabled = false;
+                    progressContainer.style.display = 'none';
+                };
+
+                xhr.onerror = function() {
+                    showError('Network error occurred');
+                    uploadBtn.disabled = false;
+                    progressContainer.style.display = 'none';
+                };
+
+                xhr.send(formData);
             } catch (error) {
                 showError('An error occurred during upload');
-            } finally {
-                loading.style.display = 'none';
+                uploadBtn.disabled = false;
+                progressContainer.style.display = 'none';
             }
         });
 
