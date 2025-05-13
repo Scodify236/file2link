@@ -331,35 +331,43 @@
             formData.append('file', file);
 
             try {
-                const eventSource = new EventSource('/upload');
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', '/upload', true);
                 
-                eventSource.onmessage = function(event) {
-                    const data = JSON.parse(event.data);
-                    
-                    if (data.error) {
-                        showError(data.error);
-                        eventSource.close();
-                        uploadBtn.disabled = false;
-                        progressContainer.style.display = 'none';
-                    } else if (data.progress !== undefined) {
-                        progressBar.style.width = data.progress + '%';
-                        progressText.textContent = data.progress + '%';
-                        
-                        if (data.progress === 100) {
-                            eventSource.close();
-                            showResult(data.access_url);
-                            uploadBtn.disabled = false;
-                            progressContainer.style.display = 'none';
-                        }
+                // Handle progress updates
+                xhr.upload.onprogress = function(e) {
+                    if (e.lengthComputable) {
+                        const percentComplete = (e.loaded / e.total) * 100;
+                        progressBar.style.width = percentComplete + '%';
+                        progressText.textContent = Math.round(percentComplete) + '%';
                     }
                 };
 
-                eventSource.onerror = function() {
-                    showError('Network error occurred');
-                    eventSource.close();
+                // Handle response
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.error) {
+                            showError(response.error);
+                        } else {
+                            showResult(response.access_url);
+                        }
+                    } else {
+                        showError('Upload failed');
+                    }
                     uploadBtn.disabled = false;
                     progressContainer.style.display = 'none';
                 };
+
+                // Handle errors
+                xhr.onerror = function() {
+                    showError('Network error occurred');
+                    uploadBtn.disabled = false;
+                    progressContainer.style.display = 'none';
+                };
+
+                // Send the request
+                xhr.send(formData);
 
             } catch (error) {
                 showError('An error occurred during upload');
