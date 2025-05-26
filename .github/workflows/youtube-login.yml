@@ -179,7 +179,7 @@ jobs:
                         
                         # Step 3: Wait and enter password
                         logging.info("⏳ Waiting for password field...")
-                        await page.wait_for_timeout(3000)
+                        await page.wait_for_timeout(5000)  # Increased wait time
                         
                         logging.info("🔑 Entering password...")
                         password_selector = 'input[type="password"]'
@@ -189,7 +189,7 @@ jobs:
                         
                         # Step 4: Wait for potential 2FA or other challenges
                         logging.info("⏳ Waiting for login completion...")
-                        await page.wait_for_timeout(8000)  # Increased wait time
+                        await page.wait_for_timeout(10000)  # Increased wait time
                         
                         # Check for common error messages
                         error_selectors = [
@@ -211,7 +211,7 @@ jobs:
                         # Step 5: Navigate to YouTube
                         logging.info("📺 Navigating to YouTube...")
                         await page.goto("https://www.youtube.com", timeout=30000, wait_until='networkidle')
-                        await page.wait_for_timeout(5000)
+                        await page.wait_for_timeout(8000)  # Increased wait time
                         
                         # Step 6: Enhanced login verification
                         logging.info("🔍 Verifying login status...")
@@ -222,6 +222,9 @@ jobs:
                         if login_verified:
                             logging.info("✅ LOGIN SUCCESSFUL! YouTube login verified!")
                             login_status['success'] = True
+                            
+                            # Additional wait to ensure cookies are fully set
+                            await page.wait_for_timeout(5000)
                             
                             # Step 7: Save cookies in JSON format
                             await context.storage_state(path=str(COOKIE_JSON_PATH))
